@@ -17,6 +17,9 @@ namespace VoiceQueen
         private double _eqMidGain;
         private double _eqHighGain;
 
+        private double _inputGainDb;
+        private double _outputGainDb;
+
         private bool _reverbEnabled = true;
         private double _reverbMix = 0.12;
         private double _reverbDecay = 0.45;
@@ -35,12 +38,18 @@ namespace VoiceQueen
 
         private bool _noiseGateEnabled = true;
         private double _noiseGateThreshold = 0.02;
+        private double _noiseGateAttackMs = 5;
+        private double _noiseGateReleaseMs = 80;
 
         private bool _compressorEnabled = true;
         private double _compressorThreshold = -12;
         private double _compressorRatio = 3.5;
         private double _compressorAttackMs = 10;
         private double _compressorReleaseMs = 60;
+        private double _compressorKneeDb = 6;
+        private double _compressorMakeupDb = 2;
+
+        private double _stereoWidth = 1.0;
 
         private bool _distortionEnabled;
         private double _distortionDrive = 1.2;
@@ -69,6 +78,18 @@ namespace VoiceQueen
         {
             get => _eqHighGain;
             set => SetField(ref _eqHighGain, value);
+        }
+
+        public double InputGainDb
+        {
+            get => _inputGainDb;
+            set => SetField(ref _inputGainDb, value);
+        }
+
+        public double OutputGainDb
+        {
+            get => _outputGainDb;
+            set => SetField(ref _outputGainDb, value);
         }
 
         public bool ReverbEnabled
@@ -155,6 +176,18 @@ namespace VoiceQueen
             set => SetField(ref _noiseGateThreshold, value);
         }
 
+        public double NoiseGateAttackMs
+        {
+            get => _noiseGateAttackMs;
+            set => SetField(ref _noiseGateAttackMs, value);
+        }
+
+        public double NoiseGateReleaseMs
+        {
+            get => _noiseGateReleaseMs;
+            set => SetField(ref _noiseGateReleaseMs, value);
+        }
+
         public bool CompressorEnabled
         {
             get => _compressorEnabled;
@@ -183,6 +216,24 @@ namespace VoiceQueen
         {
             get => _compressorReleaseMs;
             set => SetField(ref _compressorReleaseMs, value);
+        }
+
+        public double CompressorKneeDb
+        {
+            get => _compressorKneeDb;
+            set => SetField(ref _compressorKneeDb, value);
+        }
+
+        public double CompressorMakeupDb
+        {
+            get => _compressorMakeupDb;
+            set => SetField(ref _compressorMakeupDb, value);
+        }
+
+        public double StereoWidth
+        {
+            get => _stereoWidth;
+            set => SetField(ref _stereoWidth, value);
         }
 
         public bool DistortionEnabled

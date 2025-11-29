@@ -7,17 +7,25 @@ namespace VoiceQueen
     {
         private readonly EffectsProcessor _effectsProcessor;
         private readonly EffectParameterSet _parameters;
-        private float[] _inputBuffer = Array.Empty<float>();
-        private float[] _pitchBuffer = Array.Empty<float>();
+        private float[][] _inputBuffers = Array.Empty<float[]>();
+        private float[][] _pitchBuffers = Array.Empty<float[]>();
         private WaveInEvent? _capture;
         private WaveOutEvent? _playback;
         private BufferedWaveProvider? _bufferProvider;
         private readonly object _sync = new();
 
-        public event EventHandler<float>? LevelUpdated;
+        public event EventHandler<MeterReading>? InputMeterUpdated;
+        public event EventHandler<MeterReading>? OutputMeterUpdated;
+        public event EventHandler<float[]>? WaveformUpdated;
         public double PitchFactor { get; set; } = 1.0;
         public PresetMode Preset { get; private set; } = PresetMode.Clean;
         public bool IsRunning => _capture != null;
+        public bool DirectMonitoringEnabled { get; set; }
+        public double StereoWidth { get; set; } = 1.0;
+        public int SampleRate { get; set; } = 48000;
+        public int Channels { get; set; } = 1;
+        public int BufferMilliseconds { get; set; } = 10;
+        public int PlaybackLatencyMs { get; set; } = 80;
 
         public AudioEngine(EffectParameterSet parameters)
         {
@@ -37,8 +45,8 @@ namespace VoiceQueen
             _capture = new WaveInEvent
             {
                 DeviceNumber = inputDevice,
-                WaveFormat = new WaveFormat(48000, 1),
-                BufferMilliseconds = 10,
+                WaveFormat = new WaveFormat(SampleRate, Channels),
+                BufferMilliseconds = BufferMilliseconds,
                 NumberOfBuffers = 6
             };
 
@@ -51,7 +59,7 @@ namespace VoiceQueen
             _playback = new WaveOutEvent
             {
                 DeviceNumber = outputDevice,
-                DesiredLatency = 80
+                DesiredLatency = PlaybackLatencyMs
             };
 
             _playback.Init(_bufferProvider);
@@ -99,28 +107,58 @@ namespace VoiceQueen
                 return;
             }
 
-            var samples = e.BytesRecorded / 2;
-            EnsureBuffer(ref _inputBuffer, samples);
-            EnsureBuffer(ref _pitchBuffer, samples);
+            var channels = _capture.WaveFormat.Channels;
+            var frames = e.BytesRecorded / _capture.WaveFormat.BlockAlign;
+            EnsureBuffers(ref _inputBuffers, channels, frames);
+            EnsureBuffers(ref _pitchBuffers, channels, frames);
             var waveBuffer = new WaveBuffer(e.Buffer);
-            for (int i = 0; i < samples; i++)
+
+            for (int frame = 0; frame < frames; frame++)
             {
-                _inputBuffer[i] = waveBuffer.ShortBuffer[i] / 32768f;
+                for (int channel = 0; channel < channels; channel++)
+                {
+                    int idx = frame * channels + channel;
+                    float sample = waveBuffer.ShortBuffer[idx] / 32768f;
+                    _inputBuffers[channel][frame] = ApplyGain(sample, _parameters.InputGainDb);
+                }
             }
 
-            ApplyPitchShift(_inputBuffer, _pitchBuffer, samples, PitchFactor);
-            _effectsProcessor.Process(_pitchBuffer, _capture.WaveFormat.SampleRate);
+            UpdateMeter(_inputBuffers, frames, InputMeterUpdated);
 
-            var outputBuffer = new byte[samples * 2];
-            var outputWave = new WaveBuffer(outputBuffer);
-            for (int i = 0; i < samples; i++)
+            for (int channel = 0; channel < channels; channel++)
             {
-                float clamped = Math.Clamp(_pitchBuffer[i], -1f, 1f);
-                outputWave.ShortBuffer[i] = (short)(clamped * short.MaxValue);
+                ApplyPitchShift(_inputBuffers[channel], _pitchBuffers[channel], frames, PitchFactor);
+                _effectsProcessor.Process(_pitchBuffers[channel], _capture.WaveFormat.SampleRate);
+            }
+
+            if (channels == 2)
+            {
+                ApplyStereoWidth(_pitchBuffers[0], _pitchBuffers[1], frames, StereoWidth);
+            }
+
+            var outputBuffer = new byte[frames * channels * 2];
+            var outputWave = new WaveBuffer(outputBuffer);
+
+            for (int frame = 0; frame < frames; frame++)
+            {
+                for (int channel = 0; channel < channels; channel++)
+                {
+                    float processed = ApplyGain(_pitchBuffers[channel][frame], _parameters.OutputGainDb);
+                    if (DirectMonitoringEnabled)
+                    {
+                        processed = (processed + _inputBuffers[channel][frame]) * 0.5f;
+                    }
+
+                    int idx = frame * channels + channel;
+                    float clamped = Math.Clamp(processed, -1f, 1f);
+                    outputWave.ShortBuffer[idx] = (short)(clamped * short.MaxValue);
+                    _pitchBuffers[channel][frame] = clamped;
+                }
             }
 
             _bufferProvider.AddSamples(outputBuffer, 0, outputBuffer.Length);
-            UpdateLevel(_pitchBuffer, samples);
+            UpdateMeter(_pitchBuffers, frames, OutputMeterUpdated);
+            PublishWaveform(_pitchBuffers, frames);
         }
 
         private void ApplyPitchShift(float[] source, float[] destination, int length, double pitchFactor)
@@ -143,28 +181,82 @@ namespace VoiceQueen
             }
         }
 
-        private void UpdateLevel(float[] buffer, int length)
+        private void PublishWaveform(float[][] buffers, int frames)
         {
-            if (LevelUpdated == null || buffer.Length == 0)
+            if (WaveformUpdated == null || buffers.Length == 0)
             {
                 return;
             }
 
-            float sum = 0;
-            for (int i = 0; i < length; i++)
+            int step = Math.Max(1, frames / 256);
+            var points = new float[256];
+            var source = buffers[0];
+            for (int i = 0; i < points.Length; i++)
             {
-                sum += buffer[i] * buffer[i];
+                int idx = Math.Min(source.Length - 1, i * step);
+                points[i] = source[idx];
             }
 
-            float rms = (float)Math.Sqrt(sum / length);
-            LevelUpdated.Invoke(this, rms);
+            WaveformUpdated.Invoke(this, points);
         }
 
-        private static void EnsureBuffer(ref float[] buffer, int size)
+        private void UpdateMeter(float[][] buffers, int frames, EventHandler<MeterReading>? handler)
         {
-            if (buffer.Length < size)
+            if (handler == null || buffers.Length == 0)
             {
-                Array.Resize(ref buffer, size);
+                return;
+            }
+
+            double sum = 0;
+            float peak = 0;
+
+            for (int frame = 0; frame < frames; frame++)
+            {
+                for (int channel = 0; channel < buffers.Length; channel++)
+                {
+                    float sample = buffers[channel][frame];
+                    sum += sample * sample;
+                    peak = Math.Max(peak, Math.Abs(sample));
+                }
+            }
+
+            int totalSamples = frames * buffers.Length;
+            float rms = (float)Math.Sqrt(sum / totalSamples);
+            handler.Invoke(this, new MeterReading(rms, peak));
+        }
+
+        private static float ApplyGain(float sample, double gainDb)
+        {
+            double linear = Math.Pow(10, gainDb / 20.0);
+            return (float)(sample * linear);
+        }
+
+        private static void EnsureBuffers(ref float[][] buffers, int channels, int size)
+        {
+            if (buffers.Length != channels)
+            {
+                buffers = new float[channels][];
+            }
+
+            for (int i = 0; i < channels; i++)
+            {
+                buffers[i] ??= Array.Empty<float>();
+                if (buffers[i].Length < size)
+                {
+                    Array.Resize(ref buffers[i], size);
+                }
+            }
+        }
+
+        private static void ApplyStereoWidth(float[] left, float[] right, int frames, double width)
+        {
+            float widthFactor = (float)Math.Clamp(width, 0, 2);
+            for (int i = 0; i < frames; i++)
+            {
+                float mid = (left[i] + right[i]) * 0.5f;
+                float side = (left[i] - right[i]) * 0.5f * widthFactor;
+                left[i] = mid + side;
+                right[i] = mid - side;
             }
         }
 
@@ -173,4 +265,6 @@ namespace VoiceQueen
             Stop();
         }
     }
+
+    public record struct MeterReading(float Rms, float Peak);
 }

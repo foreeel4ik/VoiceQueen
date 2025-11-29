@@ -258,10 +258,12 @@ namespace VoiceQueen
     {
         private readonly EffectParameterSet _parameters;
         private float _envelope;
+        private float _gateGain;
 
         public NoiseGateEffect(EffectParameterSet parameters)
         {
             _parameters = parameters;
+            _gateGain = 1f;
         }
 
         public void Process(float[] buffer, int sampleRate)
@@ -272,17 +274,18 @@ namespace VoiceQueen
             }
 
             float threshold = (float)Math.Clamp(_parameters.NoiseGateThreshold, 0.001, 0.2);
-            float release = (float)(Math.Exp(-1.0 / (sampleRate * 0.05)));
+            float attackCoeff = (float)Math.Exp(-1.0 / (sampleRate * Math.Max(0.001, _parameters.NoiseGateAttackMs / 1000.0)));
+            float releaseCoeff = (float)Math.Exp(-1.0 / (sampleRate * Math.Max(0.001, _parameters.NoiseGateReleaseMs / 1000.0)));
 
             for (int i = 0; i < buffer.Length; i++)
             {
                 float level = Math.Abs(buffer[i]);
-                _envelope = Math.Max(level, _envelope * release);
+                _envelope = Math.Max(level, _envelope * releaseCoeff);
 
-                if (_envelope < threshold)
-                {
-                    buffer[i] = 0;
-                }
+                float target = _envelope < threshold ? 0f : 1f;
+                float coeff = target > _gateGain ? attackCoeff : releaseCoeff;
+                _gateGain = target + (_gateGain - target) * coeff;
+                buffer[i] *= _gateGain;
             }
         }
     }
@@ -305,16 +308,37 @@ namespace VoiceQueen
                 return;
             }
 
-            float threshold = (float)Math.Pow(10, _parameters.CompressorThreshold / 20.0);
             float ratio = (float)Math.Max(1.0, _parameters.CompressorRatio);
             float attackCoeff = (float)Math.Exp(-1.0 / (sampleRate * (_parameters.CompressorAttackMs / 1000.0)));
             float releaseCoeff = (float)Math.Exp(-1.0 / (sampleRate * (_parameters.CompressorReleaseMs / 1000.0)));
+            float kneeDb = (float)Math.Max(0, _parameters.CompressorKneeDb);
+            float halfKnee = kneeDb / 2f;
+            float makeup = (float)Math.Pow(10, _parameters.CompressorMakeupDb / 20.0);
 
             for (int i = 0; i < buffer.Length; i++)
             {
                 float level = Math.Abs(buffer[i]);
-                float overThreshold = level > threshold ? level / threshold : 1f;
-                float targetGain = overThreshold > 1f ? (float)Math.Pow(overThreshold, (1 - ratio)) : 1f;
+                float inputDb = 20f * (float)Math.Log10(Math.Max(level, 1e-6));
+                float thresholdDb = _parameters.CompressorThreshold;
+
+                float gainDb;
+                if (kneeDb > 0 && inputDb > thresholdDb - halfKnee && inputDb < thresholdDb + halfKnee)
+                {
+                    float delta = inputDb - (thresholdDb - halfKnee);
+                    float proportion = delta / kneeDb;
+                    float compressedDb = inputDb + (1 / ratio - 1) * proportion * proportion * delta;
+                    gainDb = compressedDb - inputDb;
+                }
+                else if (inputDb > thresholdDb)
+                {
+                    gainDb = thresholdDb + (inputDb - thresholdDb) / ratio - inputDb;
+                }
+                else
+                {
+                    gainDb = 0;
+                }
+
+                float targetGain = (float)Math.Pow(10, gainDb / 20.0) * makeup;
                 float coeff = targetGain < _gain ? attackCoeff : releaseCoeff;
                 _gain = targetGain + (_gain - targetGain) * coeff;
                 buffer[i] *= _gain;
