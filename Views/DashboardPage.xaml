@@ -17,7 +17,11 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Grid>
-                            <Border x:Name="Border" CornerRadius="12" Background="{TemplateBinding Background}" />
+                            <Border x:Name="Border" CornerRadius="12" Background="{TemplateBinding Background}">
+                                <Border.Effect>
+                                    <DropShadowEffect x:Name="ButtonShadow" BlurRadius="8" Color="#807C4DFF" ShadowDepth="0" Opacity="0.35" />
+                                </Border.Effect>
+                            </Border>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Grid>
                         <ControlTemplate.Triggers>
@@ -28,6 +32,8 @@
                                             <DoubleAnimation Storyboard.TargetProperty="(UIElement.Opacity)" To="0.9" Duration="0:0:0.15" />
                                             <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.04" Duration="0:0:0.15" />
                                             <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.04" Duration="0:0:0.15" />
+                                            <DoubleAnimation Storyboard.TargetName="ButtonShadow" Storyboard.TargetProperty="BlurRadius" To="12" Duration="0:0:0.15" />
+                                            <DoubleAnimation Storyboard.TargetName="ButtonShadow" Storyboard.TargetProperty="Opacity" To="0.55" Duration="0:0:0.15" />
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.EnterActions>
@@ -37,6 +43,8 @@
                                             <DoubleAnimation Storyboard.TargetProperty="(UIElement.Opacity)" To="1" Duration="0:0:0.15" />
                                             <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.15" />
                                             <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.15" />
+                                            <DoubleAnimation Storyboard.TargetName="ButtonShadow" Storyboard.TargetProperty="BlurRadius" To="8" Duration="0:0:0.15" />
+                                            <DoubleAnimation Storyboard.TargetName="ButtonShadow" Storyboard.TargetProperty="Opacity" To="0.35" Duration="0:0:0.15" />
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.ExitActions>
@@ -72,6 +80,9 @@
                             </Grid.RenderTransform>
                             <Border x:Name="Glow" CornerRadius="18" BorderBrush="#A47C4DFF" BorderThickness="0" Opacity="0" />
                             <Border x:Name="Card" CornerRadius="16" Background="#2F221A33" Padding="12" BorderBrush="#26FFFFFF" BorderThickness="1">
+                                <Border.Effect>
+                                    <DropShadowEffect x:Name="CardShadow" BlurRadius="6" Color="#667C4DFF" ShadowDepth="0" Opacity="0.35" />
+                                </Border.Effect>
                                 <ContentPresenter />
                             </Border>
                         </Grid>
@@ -84,6 +95,8 @@
                                             <ThicknessAnimation Storyboard.TargetName="Glow" Storyboard.TargetProperty="BorderThickness" To="3" Duration="0:0:0.2" />
                                             <DoubleAnimation Storyboard.TargetName="CardScale" Storyboard.TargetProperty="ScaleX" To="1.03" Duration="0:0:0.15" />
                                             <DoubleAnimation Storyboard.TargetName="CardScale" Storyboard.TargetProperty="ScaleY" To="1.03" Duration="0:0:0.15" />
+                                            <DoubleAnimation Storyboard.TargetName="CardShadow" Storyboard.TargetProperty="BlurRadius" To="12" Duration="0:0:0.2" />
+                                            <DoubleAnimation Storyboard.TargetName="CardShadow" Storyboard.TargetProperty="Opacity" To="0.6" Duration="0:0:0.2" />
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.EnterActions>
@@ -94,6 +107,8 @@
                                             <ThicknessAnimation Storyboard.TargetName="Glow" Storyboard.TargetProperty="BorderThickness" To="0" Duration="0:0:0.2" />
                                             <DoubleAnimation Storyboard.TargetName="CardScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.15" />
                                             <DoubleAnimation Storyboard.TargetName="CardScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.15" />
+                                            <DoubleAnimation Storyboard.TargetName="CardShadow" Storyboard.TargetProperty="BlurRadius" To="6" Duration="0:0:0.2" />
+                                            <DoubleAnimation Storyboard.TargetName="CardShadow" Storyboard.TargetProperty="Opacity" To="0.35" Duration="0:0:0.2" />
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.ExitActions>
@@ -103,6 +118,36 @@
                                 <Setter TargetName="Glow" Property="BorderThickness" Value="3" />
                                 <Setter TargetName="Card" Property="BorderBrush" Value="#7C4DFF" />
                                 <Setter TargetName="Card" Property="Background" Value="#3E291C55" />
+                                <Setter TargetName="CardShadow" Property="BlurRadius" Value="14" />
+                                <Setter TargetName="CardShadow" Property="Opacity" Value="0.72" />
+                                <Setter TargetName="CardScale" Property="ScaleX" Value="1.05" />
+                                <Setter TargetName="CardScale" Property="ScaleY" Value="1.05" />
+                                <Setter TargetName="Glow" Property="Effect">
+                                    <Setter.Value>
+                                        <BlurEffect Radius="18" />
+                                    </Setter.Value>
+                                </Setter>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard x:Name="PulseGlow">
+                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                            <DoubleAnimation Storyboard.TargetName="Glow" Storyboard.TargetProperty="Opacity" From="0.85" To="1" Duration="0:0:1.2" />
+                                            <DoubleAnimation Storyboard.TargetName="CardShadow" Storyboard.TargetProperty="BlurRadius" From="12" To="16" Duration="0:0:1.2" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <RemoveStoryboard BeginStoryboardName="PulseGlow" />
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="Glow" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.25" />
+                                            <ThicknessAnimation Storyboard.TargetName="Glow" Storyboard.TargetProperty="BorderThickness" To="0" Duration="0:0:0.25" />
+                                            <DoubleAnimation Storyboard.TargetName="CardScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.2" />
+                                            <DoubleAnimation Storyboard.TargetName="CardScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.2" />
+                                            <DoubleAnimation Storyboard.TargetName="CardShadow" Storyboard.TargetProperty="BlurRadius" To="6" Duration="0:0:0.2" />
+                                            <DoubleAnimation Storyboard.TargetName="CardShadow" Storyboard.TargetProperty="Opacity" To="0.35" Duration="0:0:0.2" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -117,7 +162,20 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" CornerRadius="16" Padding="16" Background="#26FFFFFF" BorderBrush="#32FFFFFF" BorderThickness="1">
+        <Border x:Name="HeaderPanel" Grid.Row="0" CornerRadius="16" Padding="16" Background="#26FFFFFF" BorderBrush="#32FFFFFF" BorderThickness="1" Opacity="0">
+            <Border.RenderTransform>
+                <TranslateTransform Y="-10" />
+            </Border.RenderTransform>
+            <Border.Triggers>
+                <EventTrigger RoutedEvent="Loaded">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.35" />
+                            <DoubleAnimation Storyboard.TargetProperty="(TranslateTransform.Y)" To="0" Duration="0:0:0.35" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Border.Triggers>
             <DockPanel LastChildFill="True">
                 <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center" Spacing="12">
                     <Image Width="46" Height="46" Source="../Assets/LogoVoiceQueen.png" Stretch="Uniform" />
@@ -373,12 +431,20 @@
                             <UniformGrid Columns="2" Rows="1" Margin="0,4,0,0">
                                 <StackPanel Margin="4">
                                     <TextBlock Text="Input" FontWeight="SemiBold" />
-                                    <ProgressBar Height="12" Maximum="1" Minimum="0" Margin="0,6,0,0" Foreground="#FF7C4DFF" Background="#33221A33" Value="{Binding InputMeterRms}" />
+                                    <ProgressBar x:Name="InputMeterBar" Height="12" Maximum="1" Minimum="0" Margin="0,6,0,0" Foreground="#FF7C4DFF" Background="#33221A33">
+                                        <ProgressBar.RenderTransform>
+                                            <ScaleTransform ScaleX="1" />
+                                        </ProgressBar.RenderTransform>
+                                    </ProgressBar>
                                     <TextBlock Text="{Binding InputMeterPeak, StringFormat=Peak: {0:P0}}" Opacity="0.7" />
                                 </StackPanel>
                                 <StackPanel Margin="4">
                                     <TextBlock Text="Output" FontWeight="SemiBold" />
-                                    <ProgressBar Height="12" Maximum="1" Minimum="0" Margin="0,6,0,0" Foreground="#FF4DD0E1" Background="#33221A33" Value="{Binding OutputMeterRms}" />
+                                    <ProgressBar x:Name="OutputMeterBar" Height="12" Maximum="1" Minimum="0" Margin="0,6,0,0" Foreground="#FF4DD0E1" Background="#33221A33">
+                                        <ProgressBar.RenderTransform>
+                                            <ScaleTransform ScaleX="1" />
+                                        </ProgressBar.RenderTransform>
+                                    </ProgressBar>
                                     <TextBlock Text="{Binding OutputMeterPeak, StringFormat=Peak: {0:P0}}" Opacity="0.7" />
                                 </StackPanel>
                             </UniformGrid>
@@ -405,7 +471,20 @@
             </Border>
         </Grid>
 
-        <DockPanel Grid.Row="2" Margin="0,12,0,0">
+        <DockPanel x:Name="FooterPanel" Grid.Row="2" Margin="0,12,0,0" Opacity="0">
+            <DockPanel.RenderTransform>
+                <TranslateTransform Y="8" />
+            </DockPanel.RenderTransform>
+            <DockPanel.Triggers>
+                <EventTrigger RoutedEvent="Loaded">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.9" Duration="0:0:0.35" />
+                            <DoubleAnimation Storyboard.TargetProperty="(TranslateTransform.Y)" To="0" Duration="0:0:0.35" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </DockPanel.Triggers>
             <TextBlock Text="Powered by RADIUS" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Opacity="0.6" />
         </DockPanel>
     </Grid>
