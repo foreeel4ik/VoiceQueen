@@ -9,6 +9,7 @@
             <Color x:Key="BackgroundColor">#FF12121B</Color>
             <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}" />
             <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+            <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}" />
             <SolidColorBrush x:Key="PanelBrush" Color="#221F2E" />
             <SolidColorBrush x:Key="TextBrush" Color="#FFECECEC" />
             <Style TargetType="TextBlock">
