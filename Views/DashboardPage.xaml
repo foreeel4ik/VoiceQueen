@@ -58,6 +58,57 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="PresetCardButton" TargetType="ToggleButton">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Grid>
+                            <Grid.RenderTransform>
+                                <ScaleTransform x:Name="CardScale" ScaleX="1" ScaleY="1" />
+                            </Grid.RenderTransform>
+                            <Border x:Name="Glow" CornerRadius="18" BorderBrush="#A47C4DFF" BorderThickness="0" Opacity="0" />
+                            <Border x:Name="Card" CornerRadius="16" Background="#2F221A33" Padding="12" BorderBrush="#26FFFFFF" BorderThickness="1">
+                                <ContentPresenter />
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="Glow" Storyboard.TargetProperty="Opacity" To="0.8" Duration="0:0:0.2" />
+                                            <ThicknessAnimation Storyboard.TargetName="Glow" Storyboard.TargetProperty="BorderThickness" To="3" Duration="0:0:0.2" />
+                                            <DoubleAnimation Storyboard.TargetName="CardScale" Storyboard.TargetProperty="ScaleX" To="1.03" Duration="0:0:0.15" />
+                                            <DoubleAnimation Storyboard.TargetName="CardScale" Storyboard.TargetProperty="ScaleY" To="1.03" Duration="0:0:0.15" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="Glow" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2" />
+                                            <ThicknessAnimation Storyboard.TargetName="Glow" Storyboard.TargetProperty="BorderThickness" To="0" Duration="0:0:0.2" />
+                                            <DoubleAnimation Storyboard.TargetName="CardScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.15" />
+                                            <DoubleAnimation Storyboard.TargetName="CardScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.15" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Glow" Property="Opacity" Value="1" />
+                                <Setter TargetName="Glow" Property="BorderThickness" Value="3" />
+                                <Setter TargetName="Card" Property="BorderBrush" Value="#7C4DFF" />
+                                <Setter TargetName="Card" Property="Background" Value="#3E291C55" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Page.Resources>
     <Grid Margin="24">
         <Grid.RowDefinitions>
@@ -111,12 +162,57 @@
                     </StackPanel>
 
                     <TextBlock Text="Presets" FontSize="18" FontWeight="SemiBold" Margin="0,12,0,0" />
-                    <UniformGrid Columns="4" Margin="0,6,0,0">
-                        <Button x:Name="CleanButton" Style="{StaticResource RoundedButton}" Content="Clean" Click="Preset_Click" Tag="Clean" />
-                        <Button x:Name="DemonButton" Style="{StaticResource RoundedButton}" Content="Demon" Click="Preset_Click" Tag="Demon" />
-                        <Button x:Name="RobotButton" Style="{StaticResource RoundedButton}" Content="Robot" Click="Preset_Click" Tag="Robot" />
-                        <Button x:Name="RadioButton" Style="{StaticResource RoundedButton}" Content="Radio" Click="Preset_Click" Tag="Radio" />
-                    </UniformGrid>
+                    <ItemsControl ItemsSource="{Binding Presets}" Margin="0,6,0,0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="3" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <ToggleButton Style="{StaticResource PresetCardButton}"
+                                              IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                              Click="PresetCard_Click"
+                                              Margin="6">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Row="0" Grid.ColumnSpan="2" Height="80" CornerRadius="12">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                    <GradientStop Color="#FF7C4DFF" Offset="0" />
+                                                    <GradientStop Color="#FF2B1C42" Offset="1" />
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                            <Border CornerRadius="12" Background="#33FFFFFF" />
+                                            <TextBlock Text="Artwork" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.6" />
+                                        </Border>
+                                        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <Border Width="26" Height="26" CornerRadius="13" Background="#33FFFFFF" BorderBrush="#55FFFFFF" BorderThickness="1">
+                                                <Viewbox Stretch="Uniform">
+                                                    <Path Data="M10 2 L14 8 L10 14 L6 8 Z" Fill="#FF7C4DFF" Width="18" Height="18" />
+                                                </Viewbox>
+                                            </Border>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding Subtitle}" Opacity="0.75" FontSize="12" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <Border Grid.Row="2" Grid.ColumnSpan="2" CornerRadius="8" Background="#22FFFFFF" Padding="8,4,8,4" HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding Category}" Opacity="0.75" FontSize="12" />
+                                        </Border>
+                                    </Grid>
+                                </ToggleButton>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
                     <Border Margin="0,16,0,0" Padding="16" CornerRadius="14" Background="#221A2433">
                         <StackPanel>
