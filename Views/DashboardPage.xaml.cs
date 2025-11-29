@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using VoiceQueen;
 
 namespace VoiceQueen.Views
@@ -377,6 +378,7 @@ namespace VoiceQueen.Views
             private set
             {
                 _inputMeterRms = value;
+                AnimateMeter(InputMeterBar, value);
                 OnPropertyChanged(nameof(InputMeterRms));
             }
         }
@@ -397,6 +399,7 @@ namespace VoiceQueen.Views
             private set
             {
                 _outputMeterRms = value;
+                AnimateMeter(OutputMeterBar, value);
                 OnPropertyChanged(nameof(OutputMeterRms));
             }
         }
@@ -426,6 +429,24 @@ namespace VoiceQueen.Views
         private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+        }
+
+        private static void AnimateMeter(ProgressBar? bar, double value)
+        {
+            if (bar is null)
+            {
+                return;
+            }
+
+            var animation = new DoubleAnimation
+            {
+                From = bar.Value,
+                To = value,
+                Duration = TimeSpan.FromMilliseconds(240),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            bar.BeginAnimation(ProgressBar.ValueProperty, animation, HandoffBehavior.Compose);
         }
     }
 }
