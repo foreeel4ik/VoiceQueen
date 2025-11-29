@@ -109,6 +109,11 @@ namespace VoiceQueen
 
             var channels = _capture.WaveFormat.Channels;
             var frames = e.BytesRecorded / _capture.WaveFormat.BlockAlign;
+            if (frames <= 0)
+            {
+                return;
+            }
+
             EnsureBuffers(ref _inputBuffers, channels, frames);
             EnsureBuffers(ref _pitchBuffers, channels, frames);
             var waveBuffer = new WaveBuffer(e.Buffer);
@@ -202,7 +207,7 @@ namespace VoiceQueen
 
         private void UpdateMeter(float[][] buffers, int frames, EventHandler<MeterReading>? handler)
         {
-            if (handler == null || buffers.Length == 0)
+            if (handler == null || buffers.Length == 0 || frames <= 0)
             {
                 return;
             }
