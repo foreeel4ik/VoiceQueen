@@ -1,7 +1,8 @@
 using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using VoiceQueen;
 
 namespace VoiceQueen.Views
@@ -10,17 +11,19 @@ namespace VoiceQueen.Views
     {
         private readonly AudioDeviceManager _deviceManager = new();
         private readonly AudioEngine _engine = new();
-        private readonly SolidColorBrush _activePresetBrush = new(Color.FromRgb(126, 74, 255));
-        private readonly SolidColorBrush _inactivePresetBrush = new(Color.FromRgb(47, 36, 64));
         private readonly AuthService _authService = new();
+
+        public ObservableCollection<PresetViewModel> Presets { get; } = new();
 
         public DashboardPage()
         {
             InitializeComponent();
+            DataContext = this;
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
             PitchSlider.ValueChanged += PitchSlider_ValueChanged;
             _engine.LevelUpdated += Engine_LevelUpdated;
+            InitializePresets();
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
@@ -40,7 +43,11 @@ namespace VoiceQueen.Views
                 OutputDevices.SelectedIndex = 0;
             }
 
-            SetPreset(PresetMode.Clean);
+            var initialPreset = Presets.FirstOrDefault() ?? Presets.FirstOrDefault(p => p.Mode == PresetMode.Clean);
+            if (initialPreset != null)
+            {
+                SetPreset(initialPreset);
+            }
             UpdatePitch(PitchSlider.Value);
         }
 
@@ -54,32 +61,89 @@ namespace VoiceQueen.Views
             _engine.PitchFactor = value;
         }
 
-        private void Preset_Click(object sender, RoutedEventArgs e)
+        private void PresetCard_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && Enum.TryParse<PresetMode>(button.Tag?.ToString(), out var preset))
+            if (sender is FrameworkElement { DataContext: PresetViewModel preset })
             {
                 SetPreset(preset);
             }
         }
 
-        private void SetPreset(PresetMode preset)
+        private void InitializePresets()
         {
-            _engine.SetPreset(preset);
-            UpdatePresetVisuals(preset);
+            Presets.Add(new PresetViewModel
+            {
+                Title = "Child Explorer",
+                Subtitle = "Bright and playful",
+                Category = "Child",
+                Mode = PresetMode.Clean
+            });
+
+            Presets.Add(new PresetViewModel
+            {
+                Title = "Demon Lord",
+                Subtitle = "Grit and growl",
+                Category = "Demon",
+                Mode = PresetMode.Demon
+            });
+
+            Presets.Add(new PresetViewModel
+            {
+                Title = "Chrome Automaton",
+                Subtitle = "Synthetic cadence",
+                Category = "Robot",
+                Mode = PresetMode.Robot
+            });
+
+            Presets.Add(new PresetViewModel
+            {
+                Title = "Vintage Radio",
+                Subtitle = "Warm broadcast",
+                Category = "Radio",
+                Mode = PresetMode.Radio
+            });
+
+            Presets.Add(new PresetViewModel
+            {
+                Title = "Star Wanderer",
+                Subtitle = "Ethereal echoes",
+                Category = "Galaxy",
+                Mode = PresetMode.Clean
+            });
+
+            Presets.Add(new PresetViewModel
+            {
+                Title = "Whisper AI",
+                Subtitle = "Soft storyteller",
+                Category = "Whisper",
+                Mode = PresetMode.Radio
+            });
+
+            Presets.Add(new PresetViewModel
+            {
+                Title = "Mythic Sage",
+                Subtitle = "Cinematic depth",
+                Category = "Narrator",
+                Mode = PresetMode.Clean
+            });
+
+            Presets.Add(new PresetViewModel
+            {
+                Title = "Neon DJ",
+                Subtitle = "Club energy",
+                Category = "Electronic",
+                Mode = PresetMode.Robot
+            });
         }
 
-        private void UpdatePresetVisuals(PresetMode active)
+        private void SetPreset(PresetViewModel preset)
         {
-            HighlightPresetButton(CleanButton, active == PresetMode.Clean);
-            HighlightPresetButton(DemonButton, active == PresetMode.Demon);
-            HighlightPresetButton(RobotButton, active == PresetMode.Robot);
-            HighlightPresetButton(RadioButton, active == PresetMode.Radio);
-        }
+            _engine.SetPreset(preset.Mode);
 
-        private void HighlightPresetButton(Button button, bool isActive)
-        {
-            button.Background = isActive ? _activePresetBrush : _inactivePresetBrush;
-            button.Opacity = isActive ? 1 : 0.8;
+            foreach (var card in Presets)
+            {
+                card.IsSelected = ReferenceEquals(card, preset);
+            }
         }
 
         private void StartButton_Click(object sender, RoutedEventArgs e)
