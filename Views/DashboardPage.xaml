@@ -215,6 +215,95 @@
                     </ItemsControl>
 
                     <Border Margin="0,16,0,0" Padding="16" CornerRadius="14" Background="#221A2433">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Live Effects" FontSize="14" FontWeight="SemiBold" />
+                            <UniformGrid Columns="2" Rows="1" Margin="0,6,0,0" HorizontalAlignment="Stretch">
+                                <StackPanel Margin="4">
+                                    <CheckBox Content="Noise Gate" IsChecked="{Binding Parameters.NoiseGateEnabled, Mode=TwoWay}" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <TextBlock Text="Threshold" Width="80" Opacity="0.8" />
+                                        <Slider Minimum="0.005" Maximum="0.1" Value="{Binding Parameters.NoiseGateThreshold, Mode=TwoWay}" Width="200" />
+                                    </StackPanel>
+                                    <CheckBox Content="Compressor" IsChecked="{Binding Parameters.CompressorEnabled, Mode=TwoWay}" Margin="0,8,0,0" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <TextBlock Text="Threshold" Width="80" Opacity="0.8" />
+                                        <Slider Minimum="-30" Maximum="0" Value="{Binding Parameters.CompressorThreshold, Mode=TwoWay}" Width="200" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <TextBlock Text="Ratio" Width="80" Opacity="0.8" />
+                                        <Slider Minimum="1" Maximum="6" Value="{Binding Parameters.CompressorRatio, Mode=TwoWay}" Width="200" />
+                                    </StackPanel>
+                                    <CheckBox Content="EQ" IsChecked="{Binding Parameters.EqEnabled, Mode=TwoWay}" Margin="0,8,0,0" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <TextBlock Text="Low" Width="80" Opacity="0.8" />
+                                        <Slider Minimum="-12" Maximum="12" Value="{Binding Parameters.EqLowGain, Mode=TwoWay}" Width="200" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <TextBlock Text="Mid" Width="80" Opacity="0.8" />
+                                        <Slider Minimum="-12" Maximum="12" Value="{Binding Parameters.EqMidGain, Mode=TwoWay}" Width="200" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <TextBlock Text="High" Width="80" Opacity="0.8" />
+                                        <Slider Minimum="-12" Maximum="12" Value="{Binding Parameters.EqHighGain, Mode=TwoWay}" Width="200" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Margin="4">
+                                    <CheckBox Content="Reverb" IsChecked="{Binding Parameters.ReverbEnabled, Mode=TwoWay}" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <TextBlock Text="Mix" Width="80" Opacity="0.8" />
+                                        <Slider Minimum="0" Maximum="0.6" Value="{Binding Parameters.ReverbMix, Mode=TwoWay}" Width="200" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <TextBlock Text="Decay" Width="80" Opacity="0.8" />
+                                        <Slider Minimum="0.1" Maximum="1" Value="{Binding Parameters.ReverbDecay, Mode=TwoWay}" Width="200" />
+                                    </StackPanel>
+                                    <CheckBox Content="Delay" IsChecked="{Binding Parameters.DelayEnabled, Mode=TwoWay}" Margin="0,8,0,0" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <TextBlock Text="Time" Width="80" Opacity="0.8" />
+                                        <Slider Minimum="50" Maximum="800" Value="{Binding Parameters.DelayTimeMs, Mode=TwoWay}" Width="200" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <TextBlock Text="Feedback" Width="80" Opacity="0.8" />
+                                        <Slider Minimum="0" Maximum="0.9" Value="{Binding Parameters.DelayFeedback, Mode=TwoWay}" Width="200" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <TextBlock Text="Mix" Width="80" Opacity="0.8" />
+                                        <Slider Minimum="0" Maximum="1" Value="{Binding Parameters.DelayMix, Mode=TwoWay}" Width="200" />
+                                    </StackPanel>
+                                    <CheckBox Content="Chorus" IsChecked="{Binding Parameters.ChorusEnabled, Mode=TwoWay}" Margin="0,8,0,0" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <TextBlock Text="Depth" Width="80" Opacity="0.8" />
+                                        <Slider Minimum="1" Maximum="20" Value="{Binding Parameters.ChorusDepthMs, Mode=TwoWay}" Width="200" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <TextBlock Text="Rate" Width="80" Opacity="0.8" />
+                                        <Slider Minimum="0.1" Maximum="5" Value="{Binding Parameters.ChorusRate, Mode=TwoWay}" Width="200" />
+                                    </StackPanel>
+                                    <CheckBox Content="Formant Shift" IsChecked="{Binding Parameters.FormantEnabled, Mode=TwoWay}" Margin="0,8,0,0" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <TextBlock Text="Shift" Width="80" Opacity="0.8" />
+                                        <Slider Minimum="-12" Maximum="12" Value="{Binding Parameters.FormantShift, Mode=TwoWay}" Width="200" />
+                                    </StackPanel>
+                                    <CheckBox Content="Distortion" IsChecked="{Binding Parameters.DistortionEnabled, Mode=TwoWay}" Margin="0,8,0,0" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <TextBlock Text="Drive" Width="80" Opacity="0.8" />
+                                        <Slider Minimum="1" Maximum="3" Value="{Binding Parameters.DistortionDrive, Mode=TwoWay}" Width="200" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <TextBlock Text="Mix" Width="80" Opacity="0.8" />
+                                        <Slider Minimum="0" Maximum="1" Value="{Binding Parameters.DistortionMix, Mode=TwoWay}" Width="200" />
+                                    </StackPanel>
+                                    <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding Parameters.DistortionType, Mode=TwoWay}" Margin="0,4,0,0">
+                                        <ComboBoxItem Content="Soft Clip" Tag="{x:Static local:DistortionMode.SoftClip}" />
+                                        <ComboBoxItem Content="Hard Clip" Tag="{x:Static local:DistortionMode.HardClip}" />
+                                        <ComboBoxItem Content="Fuzz" Tag="{x:Static local:DistortionMode.Fuzz}" />
+                                    </ComboBox>
+                                </StackPanel>
+                            </UniformGrid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Margin="0,16,0,0" Padding="16" CornerRadius="14" Background="#221A2433">
                         <StackPanel>
                             <TextBlock Text="Signal" FontSize="14" FontWeight="SemiBold" />
                             <ProgressBar x:Name="LevelMeter" Height="16" Maximum="1" Minimum="0" Margin="0,10,0,0" Foreground="#FF7C4DFF" Background="#33221A33" />

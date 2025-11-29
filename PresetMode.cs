@@ -5,6 +5,12 @@ namespace VoiceQueen
         Clean,
         Demon,
         Robot,
-        Radio
+        Radio,
+        Child,
+        Whisper,
+        Alien,
+        Studio,
+        Narrator,
+        Storyteller
     }
 }
