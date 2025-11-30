@@ -185,7 +185,7 @@
                     </StackPanel>
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Spacing="8">
-                    <TextBlock Text="{Binding Username, Source={x:Static local:AppState.Instance}, StringFormat=Welcome, {0}}" VerticalAlignment="Center" Opacity="0.75" />
+                    <TextBlock Text="{Binding Username, Source={x:Static local:AppState.Instance}, StringFormat='Welcome, {0}'}" VerticalAlignment="Center" Opacity="0.75" />
                     <Button Content="Logout" Style="{StaticResource RoundedButton}" Background="#FF402B58" Click="Logout_Click" />
                 </StackPanel>
             </DockPanel>
